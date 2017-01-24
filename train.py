@@ -1,7 +1,6 @@
 import tensorflow as tf
 import read_data
 import image
-import time
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -48,9 +47,6 @@ def train():
 
         for step in range(FLAGS.max_steps):
             for i in range(int(len(train_images) / FLAGS.batch_size)):
-                print(train_images)
-                time.sleep(5)
-                print(train_labels)
                 batch = FLAGS.batch_size * i
                 sess.run(train_op, feed_dict={
                     images_placeholder: train_images[batch:batch + FLAGS.batch_size],
