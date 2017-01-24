@@ -5,7 +5,9 @@ import numpy as np
 
 DATA_DIR = './data/'
 NUM_CLASSES = 2
-IMG_SIZE = 118
+IMAGE_SIZE = 118
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
 
 def read_images(data):
@@ -14,7 +16,7 @@ def read_images(data):
 
     for datum in data:
         i = cv2.imread(datum[0])
-        i = cv2.resize(i, (IMG_SIZE, IMG_SIZE))
+        i = cv2.resize(i, (IMAGE_SIZE, IMAGE_SIZE))
         i = i.flatten().astype(np.float32) / 255.0
         image.append(i)
 
