@@ -30,7 +30,7 @@ def read_images(data):
     return images, labels
 
 
-def main(inputs):
+def get_images(inputs):
     data = list()
 
     for i, x in enumerate(inputs):
@@ -42,4 +42,4 @@ def main(inputs):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    get_images(sys.argv[1:])

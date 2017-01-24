@@ -1,63 +1,80 @@
 import tensorflow as tf
-from datetime import datetime
-import time
 import read_data
 import image
+import time
 
 
 FLAGS = tf.app.flags.FLAGS
+IMAGE_SIZE = read_data.IMAGE_SIZE
+IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE
+NUM_CLASSES = read_data.NUM_CLASSES
 
 tf.app.flags.DEFINE_string('train_dir', '/tmp/image_train', 'directory')
 tf.app.flags.DEFINE_integer('max_steps', 1000000, 'steps')
 tf.app.flags.DEFINE_boolean('log_device_placement',
                             False, 'whether to log device placement')
+tf.app.flags.DEFINE_float('learning_rate', 1e-4, 'learning_rate')
 
 
 def train():
     with tf.Graph().as_default():
-        global_step = tf.Variable(0, name='global_step', trainable=False)
+        images_placeholder = tf.placeholder(
+            'float', shape=(None, IMAGE_PIXELS))
+        labels_placeholder = tf.placeholder('float', shape=(None, NUM_CLASSES))
 
-        train_images, train_labels = read_data.main(['male', 'female'])
+        train_images, train_labels = read_data.get_images(['male', 'female'])
 
-        logits = image.inference(train_images)
+        test_images, test_labels = read_data.get_images(
+            ['maleTest', 'femaleTest'])
 
-        loss = image.loss(logits, train_labels)
+        logits = image.inference(images_placeholder)
 
-        train_op = image.train(loss, global_step)
+        loss_value = image.loss(logits, labels_placeholder)
 
-        class _LoggerHook(tf.train.SessionRunHook):
-            """Logs loss and runtime."""
+        train_op = image.train(loss_value, FLAGS.learning_rate)
 
-            def begin(self):
-                self._step = -1
+        acc = image.accuracy(logits, labels_placeholder)
 
-            def before_run(self, run_context):
-                self._step += 1
-                self._start_time = time.time()
-                return tf.train.SessionRunArgs(loss)
+        saver = tf.train.Saver()
 
-            def after_run(self, run_context, run_values):
-                duration = time.time() - self._start_time
-                loss_value = run_values.results
-                if self._step % 10 == 0:
-                    num_examples_per_step = FLAGS.batch_size
-                    examples_per_sec = num_examples_per_step / duration
-                    sec_per_batch = float(duration)
+        sess = tf.Session()
 
-                    format_str = ('%s: step %d, loss = %.2f (%.1f examples/sec; %.3f '
-                                  'sec/batch)')
-                    print(format_str % (datetime.now(), self._step,
-                                        loss_value, examples_per_sec, sec_per_batch))
+        sess.run(tf.initialize_all_variables())
 
-        with tf.train.MonitoredTrainingSession(
-                checkpoint_dir=FLAGS.train_dir,
-                hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps),
-                       tf.train.NanTensorHook(loss),
-                       _LoggerHook()],
-                config=tf.ConfigProto(
-                    log_device_placement=FLAGS.log_device_placement)) as mon_sess:
-            while not mon_sess.should_stop():
-                mon_sess.run(train_op)
+        summary_op = tf.merge_all_summaries()
+
+        summary_writer = tf.train.SummaryWriter(
+            FLAGS.train_dir, sess.graph_def)
+
+        for step in range(FLAGS.max_steps):
+            for i in range(int(len(train_images) / FLAGS.batch_size)):
+                print(train_images)
+                time.sleep(5)
+                print(train_labels)
+                batch = FLAGS.batch_size * i
+                sess.run(train_op, feed_dict={
+                    images_placeholder: train_images[batch:batch + FLAGS.batch_size],
+                    labels_placeholder: train_labels[batch:batch + FLAGS.batch_size],
+                })
+
+            train_accuracy = sess.run(acc, feed_dict={
+                images_placeholder: train_images,
+                labels_placeholder: train_labels,
+            })
+            print('step %d, training accuracy %g' % (step, train_accuracy))
+
+            summary_str = sess.run(summary_op, feed_dict={
+                images_placeholder: train_images,
+                labels_placeholder: train_labels,
+            })
+            summary_writer.add_summary(summary_str, step)
+
+    print('test accuracy %g' % sess.run(acc, feed_dict={
+        images_placeholder: test_images,
+        labels_placeholder: test_labels,
+    }))
+
+    saver.save(sess, 'model.ckpt')
 
 
 def main(argv=None):
