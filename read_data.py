@@ -11,22 +11,23 @@ NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
 
 def read_images(data):
-    image = list()
-    label = list()
+    images = list()
+    labels = list()
 
     for datum in data:
         i = cv2.imread(datum[0])
         i = cv2.resize(i, (IMAGE_SIZE, IMAGE_SIZE))
         i = i.flatten().astype(np.float32) / 255.0
-        image.append(i)
+        images.append(i)
 
         tmp = np.zeros(NUM_CLASSES)
-        tmp[datum[1]] = 1
-        label.append(tmp)
+        tmp[int(datum[1])] = 1
+        labels.append(tmp)
 
-        print(i, tmp)
+    images = np.asarray(images)
+    labels = np.asarray(labels)
 
-    return image, label
+    return images, labels
 
 
 def main(inputs):

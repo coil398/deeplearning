@@ -1,5 +1,6 @@
 import tensorflow as tf
 import re
+import os
 import read_data
 
 
@@ -54,7 +55,7 @@ def inference(images):
         kernel = _variable_with_weight_decay(
             'weights', shape=[5, 5, 3, 64], stddev=5e-2, wd=0.0)
         conv = tf.nn.conv2d(
-            images, kernel, [1, 1, 1, 1], tf.constant_initializer(0.0))
+            images, kernel, [1, 1, 1, 1], padding='SAME')
         biases = _variable_on_cpu('biases', [64], tf.constant_initializer(0.0))
         pre_activation = tf.nn.bias_add(conv, biases)
         conv1 = tf.nn.relu(pre_activation, name=scope.name)
@@ -84,7 +85,6 @@ def inference(images):
     with tf.variable_scope('local3') as scope:
         reshape = tf.reshape(pool2, [FLAGS.batch_size, -1])
         dim = reshape.get_shape()[1].value
-        print('dim: ' + str(dim))
         weights = _variable_with_weight_decay(
             'weights', shape=[dim, 384], stddev=0.04, wd=0.004)
         biases = _variable_on_cpu(
@@ -167,3 +167,17 @@ def train(total_loss, global_step):
         train_op = tf.no_op(name='train')
 
     return train_op
+
+
+def input():
+    if not FLAGS.data_dir:
+        raise ValueError('Please supply a data_dir')
+    data_dir = os.path.join(FLAGS.data_dir, 'image-batches-bin')
+    images, labels = read_data.inputs(
+        data_dir=data_dir, batch_size=FLAGS.batch_size)
+
+    if FLAGS.use_fp16:
+        images = tf.cast(images, tf.float16)
+        labels = tf.cast(labels, tf.float16)
+
+    return images, labels

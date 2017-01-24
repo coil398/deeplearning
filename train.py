@@ -2,7 +2,7 @@ import tensorflow as tf
 from datetime import datetime
 import time
 import read_data
-#import image
+import image
 
 
 FLAGS = tf.app.flags.FLAGS
@@ -21,7 +21,7 @@ def train():
 
         logits = image.inference(train_images)
 
-        loss = image.loss(logits, labels)
+        loss = image.loss(logits, train_labels)
 
         train_op = image.train(loss, global_step)
 
@@ -49,15 +49,15 @@ def train():
                     print(format_str % (datetime.now(), self._step,
                                         loss_value, examples_per_sec, sec_per_batch))
 
-            with tf.train.MonitoredTrainingSession(
-                    checkpoint_dir=FLAGS.train_dir,
-                    hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps),
-                           tf.train.NanTensorHook(loss),
-                           _LoggerHook()],
-                    config=tf.ConfigProto(
-                        log_device_placement=FLAGS.log_device_placement)) as mon_sess:
-                while not mon_sess.should_stop():
-                    mon_sess.run(train_op)
+        with tf.train.MonitoredTrainingSession(
+                checkpoint_dir=FLAGS.train_dir,
+                hooks=[tf.train.StopAtStepHook(last_step=FLAGS.max_steps),
+                       tf.train.NanTensorHook(loss),
+                       _LoggerHook()],
+                config=tf.ConfigProto(
+                    log_device_placement=FLAGS.log_device_placement)) as mon_sess:
+            while not mon_sess.should_stop():
+                mon_sess.run(train_op)
 
 
 def main(argv=None):
