@@ -116,7 +116,7 @@ def inference(images_placeholder):
 
 def loss(logits, labels):
     cross_entropy = -tf.reduce_sum(labels * tf.log(logits))
-    tf.scalar_summary('cross_entropy', cross_entropy)
+    tf.summary.scalar('cross_entropy', cross_entropy)
     return cross_entropy
 
 
@@ -140,7 +140,7 @@ def train(loss, learning_rate):
 def accuracy(logits, labels):
     correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
-    tf.scalar_summary('accuracy', accuracy)
+    tf.summary.scalar('accuracy', accuracy)
     return accuracy
 
 

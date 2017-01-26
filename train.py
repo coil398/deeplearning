@@ -38,14 +38,16 @@ def train():
 
         sess = tf.Session()
 
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
 
-        summary_op = tf.merge_all_summaries()
+        summary_op = tf.summary.merge_all()
 
-        summary_writer = tf.train.SummaryWriter(
-            FLAGS.train_dir, sess.graph_def)
+        summary_writer = tf.summary.FileWriter(
+            FLAGS.train_dir, sess.graph)
 
         for step in range(FLAGS.max_steps):
+            print(int(len(train_images) / FLAGS.batch_size))
+
             for i in range(int(len(train_images) / FLAGS.batch_size)):
                 batch = FLAGS.batch_size * i
                 sess.run(train_op, feed_dict={
