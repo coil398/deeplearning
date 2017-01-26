@@ -85,10 +85,10 @@ def inference(images_placeholder):
 
     with tf.variable_scope('local3') as scope:
         weights = _variable_with_weight_decay(
-            'weights', shape=[27 * 27 * 64, 384], stddev=0.04, wd=0.004)
+            'weights', shape=[28 * 28 * 64, 384], stddev=0.04, wd=0.004)
         biases = _variable_on_cpu(
             'biases', [384], tf.constant_initializer(0.1))
-        pool2_flat = tf.reshape(pool2, [-1, 27 * 27 * 64])
+        pool2_flat = tf.reshape(pool2, [-1, 28 * 28 * 64])
         local3 = tf.nn.relu(tf.matmul(pool2_flat, weights) +
                             biases, name=scope.name)
         _activation_summary(local3)
