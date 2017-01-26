@@ -34,7 +34,7 @@ def train():
 
         acc = image.accuracy(logits, labels_placeholder)
 
-        saver = tf.train.Saver(tf.all_variables())
+        saver = tf.train.Saver(tf.global_variables())
 
         sess = tf.Session()
 
@@ -53,20 +53,21 @@ def train():
                     labels_placeholder: train_labels[batch:batch + FLAGS.batch_size],
                 })
 
+                print('A batch is done.')
+
                 if i % 100 == 0:
                     train_accuracy = sess.run(acc, feed_dict={
                         images_placeholder: train_images,
                         labels_placeholder: train_labels,
                     })
-                    print('batch %d, training accuracy %g' % (i, train_accuracy))
+                    print('batch %d, training accuracy %g' %
+                          (i, train_accuracy))
 
                     summary_str = sess.run(summary_op, feed_dict={
                         images_placeholder: train_images,
                         labels_placeholder: train_labels,
                     })
                     summary_writer.add_summary(summary_str, step)
-                    
-
 
     print('test accuracy %g' % sess.run(acc, feed_dict={
         images_placeholder: test_images,

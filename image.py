@@ -50,7 +50,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
 
 
 def inference(images_placeholder):
-    images = tf.reshape(images_placeholder, [FLAGS.batch_size, 112, 112, 3])
+    images = tf.reshape(images_placeholder, [-1, 112, 112, 3])
 
     with tf.variable_scope('conv1') as scope:
         kernel = _variable_with_weight_decay(
