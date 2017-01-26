@@ -5,7 +5,7 @@ import image
 
 FLAGS = tf.app.flags.FLAGS
 IMAGE_SIZE = read_data.IMAGE_SIZE
-IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE
+IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE * 3
 NUM_CLASSES = read_data.NUM_CLASSES
 
 tf.app.flags.DEFINE_string('train_dir', '/tmp/image_train', 'directory')
