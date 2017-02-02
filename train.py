@@ -26,9 +26,12 @@ def train():
         test_images, test_labels = read_data.get_images(
             ['maleTest', 'femaleTest'])
 
-        logits = image.inference(images_placeholder)
+        keep_prob = tf.placeholder('float')
+
+        logits = image.inference(images_placeholder, keep_prob)
 
         loss_value = image.loss(logits, labels_placeholder)
+
 
         train_op = image.train(loss_value, FLAGS.learning_rate)
 
@@ -51,12 +54,14 @@ def train():
                 sess.run(train_op, feed_dict={
                     images_placeholder: train_images[batch:batch + FLAGS.batch_size],
                     labels_placeholder: train_labels[batch:batch + FLAGS.batch_size],
+                    keep_prob: 0.5
                 })
 
                 if i % 10 == 0:
                     train_accuracy = sess.run(acc, feed_dict={
                         images_placeholder: train_images,
                         labels_placeholder: train_labels,
+                        keep_prob: 1.0
                     })
                     print('batch %d, training accuracy %g' %
                           (i, train_accuracy))
@@ -64,14 +69,14 @@ def train():
                     summary_str = sess.run(summary_op, feed_dict={
                         images_placeholder: train_images,
                         labels_placeholder: train_labels,
+                        keep_prob: 1.0
                     })
                     summary_writer.add_summary(summary_str, step)
-
-                print('done')
 
     print('test accuracy %g' % sess.run(acc, feed_dict={
         images_placeholder: test_images,
         labels_placeholder: test_labels,
+        keep_prob: 1.0
     }))
 
     saver.save(sess, 'model.ckpt')
