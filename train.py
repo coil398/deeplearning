@@ -53,9 +53,7 @@ def train():
                     labels_placeholder: train_labels[batch:batch + FLAGS.batch_size],
                 })
 
-                print('A batch is done.')
-
-                if i % 100 == 0:
+                if i % 10 == 0:
                     train_accuracy = sess.run(acc, feed_dict={
                         images_placeholder: train_images,
                         labels_placeholder: train_labels,
@@ -68,6 +66,8 @@ def train():
                         labels_placeholder: train_labels,
                     })
                     summary_writer.add_summary(summary_str, step)
+
+                print('done')
 
     print('test accuracy %g' % sess.run(acc, feed_dict={
         images_placeholder: test_images,

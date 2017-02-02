@@ -5,7 +5,7 @@ import numpy as np
 
 DATA_DIR = './data/'
 NUM_CLASSES = 2
-IMAGE_SIZE = 112
+IMAGE_SIZE = 32
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
@@ -15,6 +15,7 @@ def read_images(data):
     labels = list()
 
     for datum in data:
+
         i = cv2.imread(datum[0])
         i = cv2.resize(i, (IMAGE_SIZE, IMAGE_SIZE))
         i = i.flatten().astype(np.float32) / 255.0
@@ -34,6 +35,8 @@ def get_images(inputs):
     data = list()
 
     for i, x in enumerate(inputs):
+        if i==2500:
+            break
         files = os.listdir(DATA_DIR + x)
         for f in files:
             data.append([DATA_DIR + inputs[i] + '/' + f, i])
