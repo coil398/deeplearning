@@ -5,17 +5,26 @@ import numpy as np
 
 DATA_DIR = './data/'
 NUM_CLASSES = 2
-IMAGE_SIZE = 32
+IMAGE_SIZE = 128
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
 
-def read_images(data):
-    images = list()
-    labels = list()
+def read_images(files):
+    length = len(files)
+    print('length: ' + str(length))
+    splitter = int(length * 0.80)
+    print('splitter: ' + str(splitter))
+    train_files = files[:splitter]
+    test_files = files[splitter + 1:]
+    print(train_files)
+    print(len(train_files))
+    print(test_files)
+    print(len(test_files))
+    sys.exit()
 
     for datum in data:
-
+        print(datum)
         i = cv2.imread(datum[0])
         i = cv2.resize(i, (IMAGE_SIZE, IMAGE_SIZE))
         i = i.flatten().astype(np.float32) / 255.0
@@ -32,17 +41,19 @@ def read_images(data):
 
 
 def get_images(inputs):
-    data = list()
+    files = list()
 
     for i, x in enumerate(inputs):
-        if i==2500:
-            break
-        files = os.listdir(DATA_DIR + x)
-        for f in files:
-            data.append([DATA_DIR + inputs[i] + '/' + f, i])
+        for file in os.listdir(x):
+            files.append([x + '/' + file, i])
 
-    return read_images(data)
+    files = np.array(files)
+    files = np.random.permutation(files)
+
+    print(files)
+
+    return read_images(files)
 
 
 if __name__ == '__main__':
-    get_images(sys.argv[1:])
+    print(get_images(sys.argv[1:]))

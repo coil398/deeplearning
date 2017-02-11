@@ -51,7 +51,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
 
 def inference(images_placeholder, keep_prob):
     def weight_variable(shape):
-        initial = tf.truncated_normal(shape, stddev=0.1)
+        initial = tf.truncated_normal(shape, stddev=0.001)
         return tf.Variable(initial)
 
     def bias_variable(shape):
@@ -96,24 +96,26 @@ def inference(images_placeholder, keep_prob):
     with tf.name_scope('softmax') as scope:
         y_conv = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
+    print(y_conv)
+
     return y_conv
 
 
 def loss(logits, labels):
-    cross_entropy = -tf.reduce_sum(labels * tf.log(tf.clip_by_value(logits, 1e-10, 1.0)))
-    tf.summary.scalar('cross_entropy', cross_entropy)
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, labels))
+    tf.scalar_summary('cross_entropy', cross_entropy)
     return cross_entropy
 
 
 def train(loss, learning_rate):
-    train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
     return train_step
 
 
 def accuracy(logits, labels):
     correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
-    tf.summary.scalar('accuracy', accuracy)
+    tf.scalar_summary('accuracy', accuracy)
     return accuracy
 
 
